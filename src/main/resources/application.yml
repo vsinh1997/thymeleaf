@@ -1,4 +1,13 @@
 spring:
-  h2:
-    console:
-      enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/thymeleaf
+    username: "postgres"
+    password: "root"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true

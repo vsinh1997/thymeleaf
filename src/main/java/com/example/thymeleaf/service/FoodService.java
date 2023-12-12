@@ -1,15 +1,27 @@
 package com.example.thymeleaf.service;
 
-import com.example.thymeleaf.model.Food;
+import com.example.thymeleaf.entity.Food;
+import com.example.thymeleaf.repository.FoodRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
+@AllArgsConstructor
 public class FoodService {
-    public Food[] getFoods() {
-        return new Food[]{
-                new Food("burrito", 7.2, 100),
-                new Food("pizza", 12.0, 50),
-                new Food("soda", 3.1, 99)
-        };
+    private final FoodRepository foodRepository;
+    public List<Food> findAll() {
+       return foodRepository.findAll();
+    }
+
+    public Food addFood(Food food) {
+        Food newFood = Food.builder()
+                .name(food.getName())
+                .price(food.getPrice())
+                .qty(food.getQty())
+                .build();
+        foodRepository.save(newFood);
+        return newFood;
     }
 }
