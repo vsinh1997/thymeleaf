@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    username: postgres
+    password: NGUYENkien96
+    url: jdbc:postgresql://localhost:5432/thymeleaf
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+
+

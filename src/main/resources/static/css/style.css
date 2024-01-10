@@ -1,0 +1,13 @@
+#wrapper {
+    max-width: 991px;
+    margin: 3rem auto 0
+}
+
+.modal {
+    background-color: transparent !important;
+}
+
+.input-disabled {
+    pointer-events: none;
+    background-color: #ddd;
+}
