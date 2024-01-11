@@ -9,12 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -26,21 +22,23 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final int PAGE_SIZE = 5;
 
     @GetMapping("")
     public String viewHome(Model model, HttpSession session) {
-        return findPaginated(1, null, model, session);
+        return findPaginated(1, null, null, null, model, session);
     }
 
     @GetMapping("/page/{pageNum}")
     public String findPaginated(
             @PathVariable(name = "pageNum") int pageNum,
             @RequestParam(name = "searchEmail", required = false) String searchEmail,
+            @RequestParam(name = "sortBy", required = false) String sortBy,
+            @RequestParam(name = "sortDir", required = false) String sortDir,
             Model model,
             HttpSession session
     ) {
-        Page<User> page = userService.findPaginated(pageNum, PAGE_SIZE, searchEmail);
+        int pageSize = 5;
+        Page<User> page = userService.findPaginated(pageNum, pageSize, searchEmail, sortBy, sortDir);
         List<User> users = page.getContent();
 
         model.addAttribute("currentPage", pageNum);
@@ -57,16 +55,25 @@ public class UserController {
     public String recoverUser(
             @PathVariable("id") Long id,
             @RequestParam(name = "page") int currentPage,
-            HttpSession session
+            HttpSession session,
+            RedirectAttributes redirectAttributes
     ) {
         String searchEmail = UserHelper.getSessionAttributeAsString(session, "searchEmail");
+
+        String message = "Recover successfully!";
+        redirectAttributes.addFlashAttribute("message", message);
+
         userService.recoverUserById(id);
         return UserHelper.redirectToUserPageWithSearchByEmail(currentPage, searchEmail);
     }
 
     @GetMapping("delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id, @RequestParam(name = "page") int currentPage, HttpSession session) {
+    public String deleteUser(@PathVariable("id") Long id, @RequestParam(name = "page") int currentPage, HttpSession session, RedirectAttributes redirectAttributes) {
         String searchEmail = UserHelper.getSessionAttributeAsString(session, "searchEmail");
+
+        String message = "Delete Successfully!";
+        redirectAttributes.addFlashAttribute("message", message);
+
         userService.deleteUserById(id);
         return UserHelper.redirectToUserPageWithSearchByEmail(currentPage, searchEmail);
     }
@@ -79,11 +86,15 @@ public class UserController {
     }
 
     @PostMapping("/addUser")
-    public String addUser(@Valid @ModelAttribute("newUser") UserRequest newUser, BindingResult bindingResult) {
+    public String addUser(@Valid @ModelAttribute("newUser") UserRequest newUser, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "add-user";
         }
-        userService.addUSer(newUser);
+
+        String message = "Add user successfully!";
+        redirectAttributes.addFlashAttribute("message", message);
+
+        userService.addUser(newUser);
         return "redirect:/user";
     }
 
@@ -97,10 +108,14 @@ public class UserController {
     }
 
     @PostMapping("/updateUser/{id}")
-    public String updateUser(@PathVariable(name = "id") Long id, @ModelAttribute("updateUser") @Valid UserRequest updateUser, BindingResult bindingResult) {
+    public String updateUser(@PathVariable(name = "id") Long id, @ModelAttribute("updateUser") @Valid UserRequest updateUser, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "update-user";
         }
+
+        String message = "Update successfully!";
+        redirectAttributes.addFlashAttribute("message", message);
+
         userService.updateUser(updateUser, id);
         return "redirect:/user";
     }

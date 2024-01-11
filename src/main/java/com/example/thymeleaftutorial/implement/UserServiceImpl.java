@@ -13,12 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -44,10 +41,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void recoverUserById(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("User Not Found");
-        }
+        Optional<User> userOptional = Optional.of(getUserById(id));
         User recoverUser = User.builder()
                 .id(userOptional.get().getId())
                 .email(userOptional.get().getEmail())
@@ -62,10 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("User Not Found");
-        }
+        Optional<User> userOptional = Optional.of(getUserById(id));
         User recoverUser = User.builder()
                 .id(userOptional.get().getId())
                 .email(userOptional.get().getEmail())
@@ -79,13 +70,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addUSer(UserRequest userDto) {
-        List<User> userList = userRepository.findAll();
-        for (User u : userList) {
-            if (u.getEmail().equals(userDto.getEmail())) {
-                throw new NotFoundException("This email " + userDto.getEmail() + " is existing, please try with another email");
-            }
-        }
+    public void addUser(UserRequest userDto) {
+        validateEmailNotExist(userDto.getEmail());
+
         User newUser = User.builder()
                 .email(userDto.getEmail())
                 .firstName(userDto.getFirstName())
@@ -98,15 +85,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(UserRequest user, Long id) {
-        Optional<User> exisitingUser = userRepository.findById(id);
-        if (exisitingUser.isEmpty()) {
-            throw new NotFoundException("This user with id " + id + " is not existing");
-        }
-
+        Optional<User> exisitingUser = Optional.of(getUserById(id));
         User updateUser = User.builder()
                 .id(id)
                 .email(exisitingUser.get().getEmail())
-
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .password(user.getPassword())
@@ -116,24 +98,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findPaginated(int pageNumber, int pageSize, String email) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+    public Page<User> findPaginated(int pageNumber, int pageSize, String email, String sortBy, String sortDir) {
+        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, sortDir);
 
         if (email != null && !email.isEmpty()) {
             return userRepository.findByEmailContainingIgnoreCase(email, pageable);
         }
-
         return userRepository.findAll(pageable);
+
     }
 
+    private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortDir) {
+        Sort.Direction direction = getDirection(sortDir);
+        String sortedBy = getSortBy(sortBy);
+
+        return PageRequest.of(pageNumber - 1, pageSize, direction, sortedBy);
+    }
+
+    private Sort.Direction getDirection(String sortDir) {
+        return (sortDir == null || sortDir.isEmpty() || sortDir.equalsIgnoreCase("asc"))
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+    }
+
+    private String getSortBy(String sortBy) {
+        return (sortBy == null || sortBy.isEmpty() || sortBy.equalsIgnoreCase("id")) ? "id" : sortBy;
+    }
 
     @Override
     public Optional<User> findUserById(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            throw new NotFoundException("This user with id " + id + " is not existing");
-        }
-        return userOptional;
+        return Optional.of(getUserById(id));
     }
+
+    private User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User with this id " + id + " not found"));
+    }
+
+    private void validateEmailNotExist(String email) {
+        List<User> userList = userRepository.findAll();
+        if (userList.stream().anyMatch(user -> user.getEmail().equals(email))) {
+            throw new NotFoundException("This email " + email + " is existing, please try with another email");
+        }
+    }
+
 
 }

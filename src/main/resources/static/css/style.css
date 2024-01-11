@@ -11,3 +11,18 @@
     pointer-events: none;
     background-color: #ddd;
 }
+
+#message {
+    position: fixed;
+    width: 500px;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: alert .1s ease-in-out;
+}
+
+@keyframes alert {
+    0% {
+      top: -1rem;
+    }
+}

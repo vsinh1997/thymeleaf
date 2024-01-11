@@ -16,11 +16,11 @@ public interface UserService {
 
     void deleteUserById(Long id);
 
-    void addUSer(UserRequest userDto);
+    void addUser(UserRequest userDto);
 
     Optional<User> findUserById(Long id);
 
     void updateUser(UserRequest user, Long id);
-    Page<User> findPaginated(int pageNumber, int pageSizer, String email);
+    Page<User> findPaginated(int pageNumber, int pageSizer, String email, String sortBy, String sortDir);
 
 }

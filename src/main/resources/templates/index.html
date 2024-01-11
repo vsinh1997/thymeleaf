@@ -9,9 +9,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
 <div id="wrapper">
+    <!--Notification-->
+    <div id="message" class="alert alert-success d-flex justify-content-between" role="alert"
+         th:if="${not #strings.isEmpty(message)}">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+
     <h1 class="fw-semibold mb-3">Users Management</h1>
 
     <div class="d-flex justify-content-between mb-3">
@@ -21,7 +30,7 @@
                 <span>Add User</span>
             </a>
             <!--Search Form-->
-            <form class="d-flex gap-2" role="search" th:action="@{'/user/page/' + ${currentPage} + '?searchEmail=' + ${#strings.isEmpty(searchEmail) ? '' : searchEmail}}" method="get">
+            <form class="d-flex gap-2" role="search" th:action="@{'/user/page/' + ${currentPage}}" method="get">
                 <input required id="searchEmail" name="searchEmail" class="form-control input-group-sm" type="search"
                        placeholder="Search email..." aria-label="Search">
                 <button class="btn btn-success btn-sm" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom"
@@ -36,18 +45,22 @@
         </div>
 
         <!--Sort Form-->
-        <form class="d-flex gap-3">
-            <select class="form-select form-select-sm" aria-label="sortBy">
+        <form class="d-flex gap-3" th:action="@{'/user/page/' + ${currentPage}}" method="get">
+            <select name="sortBy" class="form-select form-select-sm" aria-label="sortBy">
                 <option value="default" disabled selected>--Sort By</option>
                 <option value="id">ID</option>
                 <option value="email">Email</option>
+                <option value="firstName">FirstName</option>
+                <option value="lastName">LastName</option>
+                <option value="isDeleted">Status</option>
             </select>
 
-            <select class="form-select form-select-sm" aria-label="sortDir">
+            <select name="sortDir" class="form-select form-select-sm" aria-label="sortDir">
                 <option value="default" disabled selected>--Order By</option>
                 <option value="asc">ASC</option>
                 <option value="desc">DESC</option>
             </select>
+
 
             <button type="submit" class="btn btn-primary">Apply</button>
         </form>
@@ -80,17 +93,20 @@
                        data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
                         <i class="bi bi-pencil-square"></i>
                     </a>
-                    <a class="btn btn-sm btn-danger" data-bs-toggle="modal" th:data-bs-target="'#staticBackdrop-' + ${user.id}">
+                    <a class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                       th:data-bs-target="'#staticBackdrop-' + ${user.id}">
                         <i class="bi bi-lock"></i>
                     </a>
                 </span>
-                <a th:case="true" class="btn btn-sm btn-info" data-bs-toggle="modal" th:data-bs-target="'#staticBackdrop-' + ${user.id}">
+                <a th:case="true" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                   th:data-bs-target="'#staticBackdrop-' + ${user.id}">
                     <i class="bi bi-unlock"></i>
                 </a>
             </td>
             <!--Modal-->
-            <td th:id="'staticBackdrop-' + ${user.id}" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false"
-                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <td th:id="'staticBackdrop-' + ${user.id}" class="modal fade" data-bs-backdrop="static"
+                data-bs-keyboard="false"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header" th:switch="${user.isDeleted}">
@@ -143,5 +159,6 @@
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
 <script th:src="@{/js/index.js}"></script>
+
 </body>
 </html>
