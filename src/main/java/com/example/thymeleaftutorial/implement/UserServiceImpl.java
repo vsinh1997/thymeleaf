@@ -13,9 +13,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -113,20 +116,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findPaginated(int pageNumber, int pageSize) {
-
+    public Page<User> findPaginated(int pageNumber, int pageSize, String email) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+
+        if (email != null && !email.isEmpty()) {
+            return userRepository.findByEmailContainingIgnoreCase(email, pageable);
+        }
+
         return userRepository.findAll(pageable);
     }
 
-    @Override
-    public List<User> findByUserEmail(String email) {
-        List<User> users = userRepository.findUserByEmail(email);
-        if (users.isEmpty()) {
-            throw new NotFoundException("This user with email " + email + " is not existing");
-        }
-        return users;
-    }
 
     @Override
     public Optional<User> findUserById(Long id) {

@@ -21,12 +21,15 @@
                 <span>Add User</span>
             </a>
             <!--Search Form-->
-            <form class="d-flex gap-2" role="search" th:action="@{/user/search}" method="get">
-                <input required id="searchEmail" name="searchEmail" class="form-control input-group-sm" type="search" placeholder="Search email..." aria-label="Search">
-                <button class="btn btn-success btn-sm" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Search">
+            <form class="d-flex gap-2" role="search" th:action="@{'/user/page/' + ${currentPage} + '?searchEmail=' + ${#strings.isEmpty(searchEmail) ? '' : searchEmail}}" method="get">
+                <input required id="searchEmail" name="searchEmail" class="form-control input-group-sm" type="search"
+                       placeholder="Search email..." aria-label="Search">
+                <button class="btn btn-success btn-sm" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        data-bs-title="Search">
                     <i class="bi bi-search"></i>
                 </button>
-                <a th:href="@{/user}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Refresh list">
+                <a th:href="@{/user}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                   data-bs-title="Refresh list">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
             </form>
@@ -72,36 +75,40 @@
             <td th:text="${user.lastName}"></td>
             <td th:text="${user.isDeleted ? 'Block' : 'Active'}"></td>
             <td th:switch="${user.isDeleted}">
-                    <span th:case="false">
-                        <a th:href="@{/user/updateUser/{id}(id = ${user.id})}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <a class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop" data-bs-placement="bottom" data-bs-title="Lock account">
-                            <i class="bi bi-lock"></i>
-                        </a>
-                    </span>
-                <a th:case="true" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#staticBackdrop" data-bs-placement="bottom" data-bs-title="Lock account">
+                <span th:case="false">
+                    <a th:href="@{/user/updateUser/{id}(id = ${user.id})}" class="btn btn-sm btn-warning"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Edit">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a class="btn btn-sm btn-danger" data-bs-toggle="modal" th:data-bs-target="'#staticBackdrop-' + ${user.id}">
+                        <i class="bi bi-lock"></i>
+                    </a>
+                </span>
+                <a th:case="true" class="btn btn-sm btn-info" data-bs-toggle="modal" th:data-bs-target="'#staticBackdrop-' + ${user.id}">
                     <i class="bi bi-unlock"></i>
                 </a>
             </td>
-
             <!--Modal-->
-            <td class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <td th:id="'staticBackdrop-' + ${user.id}" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false"
+                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header" th:switch="${user.isDeleted}">
                             <h1 class="modal-title fs-5" id="staticBackdropLabel"
                                 th:text="${user.isDeleted() ? 'Recover Confirm' : 'Block Confirm'}"></h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                         </div>
                         <div class="modal-body" th:switch="${user.isDeleted}">
                             <p th:text="${user.isDeleted() ? 'Are you sure that recover this user ?' : 'Are you sure that block this user ?'}"></p>
                         </div>
                         <div class="modal-footer" th:switch="${user.isDeleted}">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <a th:case="true" th:href="@{/user/recover/{id}(id = ${user.id})}" class="btn btn-primary">Submit</a>
-                            <a th:case="false" th:href="@{/user/delete/{id}(id = ${user.id})}" class="btn btn-primary">Submit</a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel
+                            </button>
+                            <a th:case="true" th:href="@{'/user/recover/' + ${user.id} + '?page=' + ${currentPage}}"
+                               class="btn btn-primary">Submit</a>
+                            <a th:case="false" th:href="@{'/user/delete/' + ${user.id} + '?page=' + ${currentPage}}"
+                               class="btn btn-primary">Submit</a>
                         </div>
                     </div>
                 </div>
@@ -131,12 +138,10 @@
 </div>
 
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
-<script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-</script>
+<script th:src="@{/js/index.js}"></script>
 </body>
 </html>
